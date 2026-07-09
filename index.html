@@ -39,6 +39,16 @@ tbody tr:nth-child(-n+3){background:#fff8fb}
 .sorted{color:var(--acc2);font-weight:700}
 .empty{padding:44px;text-align:center;color:var(--mut)}
 .foot{color:var(--mut);font-size:11px;text-align:center;padding:18px}
+@media (max-width:640px){
+  h1{font-size:16px}
+  main{padding:10px 8px}
+  .tabs button{padding:8px 12px;font-size:12px}
+  th,td{padding:10px 8px;font-size:13px}
+  .name{white-space:normal;word-break:break-word}
+  /* スマホは「順位＋名前＋選択中の項目」だけ表示（横スクロール不要） */
+  th.c-metric,td.c-metric{display:none}
+  .m-diamond .c-diamond,.m-timeSec .c-timeSec,.m-days .c-days,.m-videos .c-videos,.m-weekLuc .c-weekLuc,.m-newCum .c-newCum{display:table-cell}
+}
 </style>
 </head>
 <body>
@@ -77,7 +87,7 @@ function hm(s){return Math.floor(s/3600)+'時間'+Math.floor((s%3600)/60)+'分';
 function nf(n){return (n||0).toLocaleString();}
 function agp(a){const k=a.includes('ITK')&&a.includes('NEO')?'':a==='ITK'?'itk':'neo';return `<span class="pill ${k}">${a}</span>`;}
 function esc(s){return (s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));}
-function col(k,label){const on=(metric===k);return '<th class="num'+(on?' sorted':'')+'" onclick="setMetric(\''+k+'\')">'+label+'</th>';}
+function col(k,label){const on=(metric===k);return '<th class="num c-metric c-'+k+(on?' sorted':'')+'" onclick="setMetric(\''+k+'\')">'+label+'</th>';}
 function render(){
   const d=cur();
   const termMap={week:'週間 ',mtd:'当月 ',month:'前月 '};
@@ -90,18 +100,18 @@ function render(){
   list=pointsView?list.filter(c=>(c.newCum||0)>0):list.filter(c=>c.timeSec>0);
   list.sort((a,b)=>b[metric]-a[metric]);
   document.getElementById('cnt').textContent='';
-  let h='<div class="tblwrap"><table><thead><tr>'
+  let h='<div class="tblwrap"><table class="m-'+metric+'"><thead><tr>'
      +'<th class="rk">#</th><th>名前</th>'
      +col('diamond','ダイヤ')+col('timeSec','配信時間')+col('days','日数')+col('videos','動画投稿')+col('weekLuc','今週LUC')+col('newCum','累計LUC')
      +'</tr></thead><tbody>';
   list.forEach((c,i)=>{
     h+='<tr><td class="rk'+(i<3?' top':'')+'">'+(i+1)+'</td><td class="name">'+esc(c.nick)+'</td>'
-      +'<td class="num dia'+(metric==='diamond'?' sorted':'')+'">'+nf(c.diamond)+'</td>'
-      +'<td class="num'+(metric==='timeSec'?' sorted':'')+'">'+hm(c.timeSec)+'</td>'
-      +'<td class="num'+(metric==='days'?' sorted':'')+'">'+c.days+'</td>'
-      +'<td class="num'+(metric==='videos'?' sorted':'')+'">'+(c.videos||0)+'</td>'
-      +'<td class="num '+(c.weekLuc>0?'grn':'muted')+(metric==='weekLuc'?' sorted':'')+'">'+(c.weekLuc>0?'+'+nf(c.weekLuc):'-')+'</td>'
-      +'<td class="num'+(metric==='newCum'?' sorted':'')+'">'+nf(c.newCum)+'</td></tr>';
+      +'<td class="num dia c-metric c-diamond'+(metric==='diamond'?' sorted':'')+'">'+nf(c.diamond)+'</td>'
+      +'<td class="num c-metric c-timeSec'+(metric==='timeSec'?' sorted':'')+'">'+hm(c.timeSec)+'</td>'
+      +'<td class="num c-metric c-days'+(metric==='days'?' sorted':'')+'">'+c.days+'</td>'
+      +'<td class="num c-metric c-videos'+(metric==='videos'?' sorted':'')+'">'+(c.videos||0)+'</td>'
+      +'<td class="num c-metric c-weekLuc '+(c.weekLuc>0?'grn':'muted')+(metric==='weekLuc'?' sorted':'')+'">'+(c.weekLuc>0?'+'+nf(c.weekLuc):'-')+'</td>'
+      +'<td class="num c-metric c-newCum'+(metric==='newCum'?' sorted':'')+'">'+nf(c.newCum)+'</td></tr>';
   });
   h+='</tbody></table></div>';
   bodyEl.innerHTML=h;
