@@ -23,6 +23,8 @@ main{padding:16px 12px;max-width:1000px;margin:0 auto}
 .search:focus{outline:2px solid var(--acc)}
 .tblwrap{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 18px rgba(234,74,117,.06)}
 th{background:#fff;box-shadow:inset 0 -1px 0 var(--line),0 2px 6px rgba(0,0,0,.05);z-index:2}
+/* 当月・前月は「今週LUC」列を非表示（LUCは週間のみ） */
+.mode-mtd .c-weekLuc,.mode-month .c-weekLuc{display:none}
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 th,td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
 th{color:var(--mut);font-weight:700;position:sticky;top:0;background:#fff;cursor:pointer;user-select:none}
@@ -100,7 +102,7 @@ function render(){
   list=pointsView?list.filter(c=>(c.newCum||0)>0):list.filter(c=>c.timeSec>0);
   list.sort((a,b)=>b[metric]-a[metric]);
   document.getElementById('cnt').textContent='';
-  let h='<div class="tblwrap"><table class="m-'+metric+'"><thead><tr>'
+  let h='<div class="tblwrap"><table class="m-'+metric+' mode-'+mode+'"><thead><tr>'
      +'<th class="rk">#</th><th>名前</th>'
      +col('diamond','ダイヤ')+col('timeSec','配信時間')+col('days','日数')+col('videos','動画投稿')+col('weekLuc','今週LUC')+col('newCum','累計LUC')
      +'</tr></thead><tbody>';
