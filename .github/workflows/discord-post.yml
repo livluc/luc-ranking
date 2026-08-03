@@ -1,0 +1,96 @@
+name: LUC weekly Discord post
+
+# 毎日 01:00 UTC（＝日本時間 10:00）にチェックし、
+# 新しく予約された内容があれば自動でDiscordへ投稿します。
+# 手動実行（Actionsタブの Run workflow ボタン）も可能です。
+on:
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Post to Discord if new content is queued
+        env:
+          WEBHOOK_1: ${{ secrets.WEBHOOK_1 }}
+          WEBHOOK_2: ${{ secrets.WEBHOOK_2 }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys, urllib.request
+
+          PAYLOAD = "discord/week.json"
+          MARKER  = "discord/last_posted.txt"
+
+          if not os.path.exists(PAYLOAD):
+              print("予約データ (discord/week.json) がありません。何もしません。")
+              sys.exit(0)
+
+          data = json.load(open(PAYLOAD, encoding="utf-8"))
+          content   = data.get("content", "").strip()
+          label     = data.get("label", "")
+          generated = data.get("generated", "")
+
+          if not content:
+              print("投稿内容が空です。何もしません。")
+              sys.exit(0)
+
+          last = ""
+          if os.path.exists(MARKER):
+              last = open(MARKER, encoding="utf-8").read().strip()
+
+          if generated and generated == last:
+              print(f"この内容（{label} / {generated}）は既に投稿済みです。スキップします。")
+              sys.exit(0)
+
+          hooks = [u for u in (os.environ.get("WEBHOOK_1"), os.environ.get("WEBHOOK_2")) if u]
+          if not hooks:
+              print("‼ Webhookのシークレット (WEBHOOK_1 / WEBHOOK_2) が未設定です。")
+              sys.exit(1)
+
+          body = json.dumps({
+              "content": content,
+              "allowed_mentions": {"parse": ["everyone", "users", "roles"]},
+          }).encode("utf-8")
+
+          ok = 0
+          for url in hooks:
+              req = urllib.request.Request(
+                  url, data=body, method="POST",
+                  headers={"Content-Type": "application/json", "User-Agent": "luc-bot"},
+              )
+              try:
+                  with urllib.request.urlopen(req):
+                      ok += 1
+              except Exception as e:
+                  print("‼ 投稿失敗:", url[-16:], e)
+
+          if ok == 0:
+              print("‼ すべての投稿に失敗しました。")
+              sys.exit(1)
+
+          print(f"✅ Discordに投稿しました（{label} / {ok}/{len(hooks)}チャンネル）")
+
+          # 二重投稿ふせぎ：投稿した目印を残す
+          os.makedirs("discord", exist_ok=True)
+          open(MARKER, "w", encoding="utf-8").write(generated or label)
+          PY
+
+      - name: Save posted marker
+        run: |
+          if [ -n "$(git status --porcelain discord/last_posted.txt)" ]; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add discord/last_posted.txt
+            git commit -m "mark discord post as sent"
+            git push
+          else
+            echo "変更なし（投稿していない、または既に記録済み）。"
+          fi
