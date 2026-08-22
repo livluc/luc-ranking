@@ -64,8 +64,9 @@ td{padding:11px 11px;color:#2b2b33;vertical-align:middle;border-bottom:1px solid
 .rc{text-align:center}
 .rknum{color:#7a7580;font-size:21px;font-family:'Playfair Display',serif;font-weight:800}
 .num{font-family:'Playfair Display',serif;font-weight:800;font-size:22px;line-height:1;display:inline-block;transform:translateY(-2px);color:#1a1a1a}
-/* 上位3行＝フラットなゴールド（中央＆左右が明るい） */
-tr.rk-gold td{background:linear-gradient(90deg,#f2da88 0%,#c99a34 24%,#fbeaad 50%,#c99a34 76%,#f2da88 100%);color:#3a280a;border-bottom:1px solid #c19a37}
+/* 上位3行＝フラットなゴールド（行全体に1枚：中央＆左右が明るい） */
+tr.rk-gold{background:linear-gradient(90deg,#f2da88 0%,#c99a34 24%,#fbeaad 50%,#c99a34 76%,#f2da88 100%)}
+tr.rk-gold td{background:transparent;color:#3a280a;border-bottom:1px solid #c19a37}
 tr.rk-gold .nm{color:#3a280a}
 tr.rk-gold .n{color:#4a350f}
 tr.rk-gold .dia{color:#c9781f}
